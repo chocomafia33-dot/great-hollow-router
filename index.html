@@ -76,14 +76,20 @@
     <svg id="map" viewBox="0 0 1000 760" role="img" aria-label="Great Hollow schematic map"></svg>
     <div class="mapLegend">
       <span><i class="dot crystal"></i>推奨結晶</span>
-      <span><i class="dot fixed"></i>固定POI</span>
       <span><i class="line"></i>ルート</span>
     </div>
+    <div id="mapNote" class="note" aria-live="polite"></div>
   </div>
 
   <div id="status" class="status"></div>
   <div class="roleAdvice" id="roleAdvice"></div>
   <button id="reset" class="secondary">最初から</button>
+</section>
+
+<section class="panel">
+  <button id="copyDiagnostic" class="secondary">診断情報をコピー</button>
+  <div id="diagnosticMessage" class="note" aria-live="polite"></div>
+  <textarea id="diagnosticText" class="hidden" readonly aria-label="診断情報" style="width:100%;min-height:180px;margin-top:8px"></textarea>
 </section>
 
 <section class="panel warning">

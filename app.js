@@ -16,7 +16,7 @@ const routeData = {
  kaiden:{
   detect:[
    {q:"飛行中／見晴らしの結晶は？",yes:"red",no:"ruins"},
-   {q:"毒/血の廃墟側の結晶は？",yes:"blue",no:"green"},
+   {q:"毒/血の廃墟側の結晶は？",yes:"blue",no:"central"},
    {q:"中央側の緑チェック結晶は？",yes:"green",no:"purple"}
   ],
   routes:{
@@ -57,13 +57,22 @@ let state={start:null,role:null,seed:null,route:[],done:new Set(),timer:0,interv
 
 const $=s=>document.querySelector(s);
 document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
+ clearResult();
  state.start=b.dataset.start; state.role="crystal";
+ document.querySelectorAll("[data-role]").forEach(x=>x.classList.toggle("active",x.dataset.role===state.role));
  document.querySelectorAll("[data-start]").forEach(x=>x.classList.remove("active")); b.classList.add("active");
  $("#rolePanel").classList.remove("hidden"); showDetect();
 });
 document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{
  state.role=b.dataset.role; document.querySelectorAll("[data-role]").forEach(x=>x.classList.remove("active"));b.classList.add("active");
+ if(state.seed)render();
 });
+function clearResult(){
+ if(state.interval)clearInterval(state.interval);
+ state.seed=null;state.route=[];state.done=new Set();state.timer=0;state.interval=null;
+ $("#result").classList.add("hidden");
+ $("#timerStart").textContent="タイマー";updateTimer();
+}
 function showDetect(){
  $("#detect").classList.remove("hidden");
  const first=routeData[state.start].detect[0]; renderQuestion(first);
@@ -83,6 +92,8 @@ window.answer=function(ans){
  if(next) renderQuestion(next);
 };
 function setSeed(seed){
+ if(state.interval)clearInterval(state.interval);
+ state.interval=null;state.timer=0;$("#timerStart").textContent="タイマー";updateTimer();
  state.seed=seed; state.route=[...routeData[state.start].routes[seed]].slice(0,4);
  state.done=new Set();
  $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase(); $("#seed").style.color=colors[seed.toUpperCase()];
@@ -107,7 +118,7 @@ function render(){
  state.role==="growth"?"育成担当：教会・拠点・強敵は固定配置/検証情報が不足するため、現版では結晶以外の具体座標を自動指定しません。":"フレックス：結晶NEXTを基準にしつつ、味方の育成状況に応じて離脱してください。";
  $("#roleAdvice").textContent=advice;
 }
-window.toggleDone=function(i){state.done.has(i)?state.done.delete(i):state.done.add(i);render();};
+window.toggleDone=function(i){if(!Number.isInteger(i)||i<0||i>=state.route.length)return;state.done.has(i)?state.done.delete(i):state.done.add(i);render();};
 function drawMap(){
  const svg=$("#map"); svg.innerHTML="";
  const NS="http://www.w3.org/2000/svg";
@@ -116,13 +127,10 @@ function drawMap(){
  el("path",{d:"M90 150 Q260 50 430 120 T760 80 Q900 170 840 330 T900 620 Q700 720 500 650 T150 690 Q60 520 110 360Z",fill:"#171b1d",stroke:"#3b4145","stroke-width":"4"});
  el("path",{d:"M160 470 Q350 390 500 430 T820 330",fill:"none",stroke:"#31373a","stroke-width":"28","stroke-linecap":"round"});
  el("path",{d:"M300 150 Q450 260 520 360 T700 600",fill:"none",stroke:"#292f31","stroke-width":"22","stroke-linecap":"round"});
- // fixed markers, deliberately schematic
- [["教会",[150,180]],["拠点",[500,650]],["地下入口",[650,540]],["霊脈",[440,250]]].forEach(([n,p])=>{
-  el("circle",{cx:p[0],cy:p[1],r:14,fill:"#62686c",stroke:"#b1b5b5","stroke-width":"2"});
-  const t=el("text",{x:p[0]+18,y:p[1]+4,fill:"#aeb2b5","font-size":"15"});t.textContent=n;
- });
- const pts=state.route.map((n,i)=>({name:n,p:pos[n]||[500,380],i}));
- for(let i=0;i<pts.length-1;i++)el("line",{x1:pts[i].p[0],y1:pts[i].p[1],x2:pts[i+1].p[0],y2:pts[i+1].p[1],stroke:colors[state.seed.toUpperCase()], "stroke-width":"8","stroke-linecap":"round","opacity":".8"});
+ const missing=state.route.filter(n=>!pos[n]);
+ $("#mapNote").textContent=missing.length?`座標未登録のため地図には表示していません：${missing.join("、")}。場所はルート一覧で確認してください。`:"模式図です。結晶の実際の座標、移動経路は未検証です。";
+ const pts=state.route.map((n,i)=>({name:n,p:pos[n],i})).filter(o=>o.p);
+ for(let i=0;i<pts.length-1;i++)if(pts[i+1].i===pts[i].i+1)el("line",{x1:pts[i].p[0],y1:pts[i].p[1],x2:pts[i+1].p[0],y2:pts[i+1].p[1],stroke:colors[state.seed.toUpperCase()], "stroke-width":"8","stroke-linecap":"round","opacity":".8"});
  pts.forEach(o=>{
   const done=state.done.has(o.i), next=state.route.findIndex((_,i)=>!state.done.has(i))===o.i;
   el("circle",{cx:o.p[0],cy:o.p[1],r:next?27:22,fill:done?"#383c40":colors[state.seed.toUpperCase()],stroke:next?"#fff":"#111","stroke-width":next?4:3,opacity:done?".35":"1"});
@@ -138,3 +146,11 @@ $("#timerStart").onclick=()=>{
 };
 function updateTimer(){let m=Math.floor(state.timer/60),s=String(state.timer%60).padStart(2,"0");$("#timer").textContent=state.timer?`${m}:${s}`:"—";}
 $("#reset").onclick=()=>location.reload();
+
+$("#copyDiagnostic").onclick=async()=>{
+ const data={version:"repair-20261008",start:state.start,role:state.role,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],timer:state.timer,mapMissing:state.route.filter(n=>!pos[n])};
+ const report=JSON.stringify(data,null,2);
+ $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
+ try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
+ catch{$("#diagnosticMessage").textContent="下の診断情報を選択してコピーしてください。";}
+};
