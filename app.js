@@ -251,7 +251,7 @@ const candidateGroups = {
 // Highlight means a source suggestion, not verified travel ease or a fixed order.
 const startHints={south:{purple:["g2-1"]},kaiden:{blue:["g1-2"],green:["g4-1"]},north:{red:["g3-2"],green:["g4-3"]}};
 function hasStartHint(id){return (startHints[state.start]?.[state.seed]||[]).includes(id);}
-let state={start:null,seed:null,candidates:[],done:new Set(),extra:0,mismatch:false};
+let state={start:null,seed:null,candidates:[],zone:"top",mismatch:false};
 
 const $=s=>document.querySelector(s);
 document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
@@ -261,10 +261,28 @@ document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
  showDetect();
 });
 function clearResult(){
- state.seed=null;state.candidates=[];state.done=new Set();state.extra=0;state.mismatch=false;
+ state.seed=null;state.candidates=[];state.zone="top";state.mismatch=false;
+ $("#reportMismatch").disabled=true;
+ $("#status").classList.add("hidden");
+ $("#mapViews").classList.remove("zoomed");$("#zoomMap").textContent="拡大";
  $("#result").classList.add("hidden");
 }
+function resetView(){
+ $("#otherMenu").open=false;
+ $("#diagnosticText").classList.add("hidden");$("#diagnosticMessage").textContent="";
+ $("#detectMapViews").classList.remove("zoomed");$("#zoomDetectMap").textContent="拡大";
+ window.scrollTo?.(0,0);
+}
+function chooseStart(){
+ clearResult();state.start=null;state.currentNode=null;
+ $("#step1").classList.remove("hidden");$("#detect").classList.add("hidden");
+ document.querySelectorAll("[data-start]").forEach(b=>b.classList.remove("active"));
+ resetView();
+}
+$("#redetect").onclick=chooseStart;
+$("#changeStart").onclick=chooseStart;
 function showDetect(){
+ $("#step1").classList.add("hidden");resetView();
  $("#detect").classList.remove("hidden");
  const first=routeData[state.start].detect[0]; renderQuestion(first);
 }
@@ -284,7 +302,7 @@ function drawDetectionMap(node){
 $("#zoomDetectMap").onclick=()=>{
  const zoomed=$("#detectMapViews").classList.contains("zoomed");
  $("#detectMapViews").classList.toggle("zoomed",!zoomed);
- $("#zoomDetectMap").textContent=zoomed?"地図を拡大":"拡大を戻す";
+ $("#zoomDetectMap").textContent=zoomed?"拡大":"戻す";
 };
 window.answer=function(ans){
  if(ans==="unknown"){$("#detectNote").textContent="判定を保留中";return;}
@@ -298,60 +316,46 @@ window.answer=function(ans){
 };
 function setSeed(seed){
  $("#detect").classList.add("hidden");
- state.seed=seed; state.candidates=candidateGroups[seed].map(id=>candidatePoints.find(p=>p.id===id));
- state.done=new Set();state.extra=0;state.mismatch=false;
- $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase()+" 候補"; $("#seed").style.color=colors[seed.toUpperCase()];
- $("#status").textContent="";
- render();
+ state.seed=seed;state.candidates=candidateGroups[seed].map(id=>candidatePoints.find(p=>p.id===id));
+ state.zone="top";state.mismatch=false;
+ $("#result").classList.remove("hidden");
+ $("#seed").textContent=seed.toUpperCase()+" 候補";$("#seed").style.color=colors[seed.toUpperCase()];
+ $("#reportMismatch").disabled=false;
+ resetView();render();
 }
 function render(){
- const count=state.done.size+state.extra;
- $("#remaining").textContent=Math.max(0,4-count);
- $("#next").textContent=state.mismatch?"配置判定を保留中":count>=4?"4個回収を記録済み":"資料上の結晶候補地点";
- $("#nextMeta").textContent=state.mismatch?"候補表示を保留しています。回収記録は保持しています。":count>=4?"実際の解放状況はゲーム内で確認してください。":"収縮や味方の動きを見て、回収順を決めてください。";
- $("#collectedCount").textContent=count;
- $("#extraCount").textContent=state.extra;
- $("#extraMinus").disabled=state.extra===0;
- $("#route").innerHTML=state.candidates.map(p=>`
- <div class="routeItem ${state.done.has(p.id)?"done":""}">
-  <div class="routeNum">${p.zone==="top"?"地上":"地下"} · ${hasStartHint(p.id)&&!state.mismatch?"資料で開始付近の候補":"候補"}</div><div class="routeName">${p.name}</div>
-  <div class="routeBtns"><button data-crystal="${p.id}" aria-pressed="${state.done.has(p.id)}">${state.done.has(p.id)?"未回収に戻す":"回収済みにする"}</button></div>
- </div>`).join("");
+ document.querySelectorAll("[data-zone]").forEach(b=>{
+  const active=b.dataset.zone===state.zone;
+  b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));
+ });
+ $("#status").textContent=state.mismatch?"配置判定を保留中。再判定してください。":"";
+ $("#status").classList.toggle("hidden",!state.mismatch);
+ $(".hintLegend").classList.toggle("hidden",state.mismatch||!state.candidates.some(p=>p.zone===state.zone&&hasStartHint(p.id)));
  drawMap();
 }
-function toggleDone(id){
- if(!state.candidates.some(p=>p.id===id))return;
- state.done.has(id)?state.done.delete(id):state.done.add(id);render();
-}
-$("#route").addEventListener("click",e=>{const b=e.target.closest("[data-crystal]");if(b)toggleDone(b.dataset.crystal);});
-$("#mapViews").addEventListener("click",e=>{const b=e.target.closest("[data-crystal]");if(b)toggleDone(b.dataset.crystal);});
-$("#extraPlus").onclick=()=>{state.extra++;render();};
-$("#extraMinus").onclick=()=>{state.extra=Math.max(0,state.extra-1);render();};
+document.querySelectorAll("[data-zone]").forEach(b=>b.onclick=()=>{
+ state.zone=b.dataset.zone;
+ // Keep zoom level, but reset the pan position when changing floors.
+ render();$("#mapViews").parentElement.scrollTop=0;$("#mapViews").parentElement.scrollLeft=0;
+});
 function drawMap(){
- const tint=colors[state.seed.toUpperCase()];
- $("#mapViews").innerHTML=["top","bottom"].map(zone=>{
-  const points=state.candidates.filter(p=>p.zone===zone);
-  const marks=state.mismatch?"":points.map(p=>{
-   const done=state.done.has(p.id);
-   return `<button type="button" class="crystalMarker ${done?"collected":""} ${hasStartHint(p.id)?"startHint":""}" data-crystal="${p.id}" style="left:${p.x}%;top:${p.y}%;--marker-color:${tint}" aria-label="${p.name}（候補・位置は目安）：${done?"未回収に戻す":"回収済みにする"}" aria-pressed="${done}" title="${p.name}"><span aria-hidden="true">${done?"✓":"◆"}</span></button>`;
-  }).join("");
-  return `<section class="mapLayer"><div class="mapTitle">${zone==="top"?"地上":"地下"} · ${state.mismatch?"候補表示を保留":points.length+"候補"}</div><div class="candidateMap"><img src="map-${zone}.webp" alt="${zone==="top"?"地上":"地下"}の地図" draggable="false">${marks}</div></section>`;
- }).join("");
+ const zone=state.zone,tint=colors[state.seed.toUpperCase()];
+ const points=state.candidates.filter(p=>p.zone===zone);
+ const marks=state.mismatch?"":points.map(p=>`<span class="crystalMarker ${hasStartHint(p.id)?"startHint":""}" style="left:${p.x}%;top:${p.y}%;--marker-color:${tint}" role="img" aria-label="${p.name}（候補・位置は目安）" title="${p.name}">◆</span>`).join("");
+ $("#mapViews").innerHTML=`<div class="candidateMap"><img src="map-${zone}.webp" alt="${zone==="top"?"地上":"地下"}の結晶候補地図" draggable="false">${marks}</div>`;
 }
 $("#zoomMap").onclick=()=>{
  const zoomed=$("#mapViews").classList.contains("zoomed");
  $("#mapViews").classList.toggle("zoomed",!zoomed);
- $("#zoomMap").textContent=zoomed?"地図を拡大":"拡大を戻す";
+ $("#zoomMap").textContent=zoomed?"拡大":"戻す";
 };
 $("#reportMismatch").onclick=()=>{
  state.mismatch=true;
- $("#status").textContent="配置判定を保留中。開始地点を選び直すと再判定できます。";
  render();
 };
-$("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"candidate-map-20261009",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),done:[...state.done],extraCollected:state.extra,totalCollected:state.done.size+state.extra,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
+ const data={version:"map-focus-20261009",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),zone:state.zone,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}

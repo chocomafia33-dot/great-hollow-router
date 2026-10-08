@@ -7,19 +7,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=candidate-map-20261009">
-<title>GREAT HOLLOW ROUTER</title>
+<link rel="stylesheet" href="style.css?v=map-focus-20261009">
+<title>大空洞 · 結晶候補マップ</title>
 </head>
 <body>
-<header>
-  <div class="eyebrow">NIGHTREIGN / FORSAKEN HOLLOWS</div>
-  <h1>GREAT HOLLOW ROUTER</h1>
-  <div class="version">大空洞 · 結晶候補マップ · candidate-map-20261009</div>
-</header>
-
+<header><h1>大空洞 · 結晶候補マップ</h1></header>
 <main>
 <section id="step1" class="panel">
-  <div class="step">01 / START</div>
   <h2>開始地点</h2>
   <div class="grid3">
     <button data-start="south">南</button>
@@ -27,62 +21,37 @@
     <button data-start="north">教会の開始地点</button>
   </div>
 </section>
-
 <section id="detect" class="panel hidden">
-  <div class="step">02 / SEED DETECTION</div>
+  <div class="questionHead"><span>配置の確認</span><button id="changeStart">開始地点を変更</button></div>
   <div id="question"></div>
   <div class="mapWrap">
-    <div class="mapControls"><span>丸で囲んだ地点 · 位置は目安</span><button id="zoomDetectMap">地図を拡大</button></div>
+    <div class="mapControls"><span>丸の地点を確認 · 位置は目安</span><button id="zoomDetectMap">拡大</button></div>
     <div class="mapScroll detectMapScroll"><div id="detectMapViews"></div></div>
-    <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
   </div>
-  <div id="answers" class="grid2"></div>
-  <div id="detectNote" class="note"></div>
+  <div id="answers" class="grid3"></div>
+  <div id="detectNote" class="note" aria-live="polite"></div>
 </section>
-
-<section id="result" class="panel hidden">
-  <div class="resultHead">
-    <div>
-      <div class="step">SEED</div>
-      <div id="seed" class="seed">—</div>
-    </div>
-    <div class="remaining"><span id="remaining">4</span><small> / 4</small><br><span>あと何個</span></div>
-  </div>
-
-  <div class="nextBox">
-    <div class="nextLabel">CRYSTAL CANDIDATES</div>
-    <div id="next">—</div>
-    <div id="nextMeta" class="muted"></div>
-  </div>
-
-
-  <div class="mapWrap">
-    <div class="mapControls"><span>◆ 候補 / ✓ 回収済み · タップで切替</span><button id="zoomMap">地図を拡大</button></div>
-    <div class="mapScroll"><div id="mapViews"></div></div>
-    <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
-  </div>
-
-  <p class="note">資料上の候補です。全地点の存在は未検証で、地点名・位置も目安です。薄い金枠は資料で開始付近に挙げられた候補です。移動の容易さは未検証です。</p>
-  <div class="teamRecord"><div aria-live="polite">チーム回収記録：<strong id="collectedCount">0</strong>個</div><div class="note">味方の回収も記録してください。同じ結晶は1回だけ数えます。</div>
-  <div class="extraRecord"><span>地図外・場所不明：<strong id="extraCount">0</strong>個</span><button id="extraMinus" aria-label="場所不明の回収を1個減らす">−</button><button id="extraPlus" aria-label="場所不明の回収を1個増やす">＋</button></div></div>
-  <div class="route" id="route"></div>
-  <div id="status" class="status"></div>
-  <button id="reportMismatch" class="secondary">配置が違う・結晶が見つからない</button>
-  <button id="reset" class="secondary">最初から</button>
+<section id="result" class="hidden">
+  <div class="resultHead"><span id="seed">—</span><button id="redetect">再判定</button></div>
+  <div class="mapToolbar"><div class="layerTabs" role="group" aria-label="表示する地図">
+    <button id="showTop" data-zone="top" aria-pressed="true">地上</button>
+    <button id="showBottom" data-zone="bottom" aria-pressed="false">地下</button>
+  </div><button id="zoomMap">拡大</button></div>
+  <div id="status" class="status hidden" role="status"></div>
+  <div class="mapWrap resultMap"><div class="mapScroll"><div id="mapViews"></div></div></div>
+  <p class="mapNote">資料上の候補・位置は目安</p>
+  <p class="hintLegend"><span class="hintKey" aria-hidden="true">◇</span> 金枠：資料で開始付近に挙げられた候補</p>
 </section>
-
-<section class="panel">
+<details id="otherMenu" class="otherMenu"><summary>その他</summary>
+  <p class="note">全候補の存在と地点名・座標の対応は未検証です。追加配置や更新後の変更を含む全配置は保証しません。金枠も実際の移動の容易さを保証しません。</p>
+  <button id="reportMismatch" class="secondary" disabled>配置が違う・結晶が見つからない</button>
   <button id="copyDiagnostic" class="secondary">診断情報をコピー</button>
   <div id="diagnosticMessage" class="note" aria-live="polite"></div>
-  <textarea id="diagnosticText" class="hidden" readonly aria-label="診断情報" style="width:100%;min-height:180px;margin-top:8px"></textarea>
-</section>
-
-
+  <textarea id="diagnosticText" class="hidden" readonly aria-label="診断情報"></textarea>
+  <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
+  <div class="version">map-focus-20261009</div>
+</details>
 </main>
-
-<script src="app.js?v=candidate-map-20261009"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=map-focus-20261009"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
-
-
-
