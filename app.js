@@ -53,25 +53,18 @@ const pos={
  "北城へ向かう橋の先":[780,330],"地下アルコーブ":[670,540],"地下北西":[270,540]
 };
 
-let state={start:null,role:null,seed:null,route:[],done:new Set(),timer:0,interval:null};
+let state={start:null,seed:null,route:[],done:new Set()};
 
 const $=s=>document.querySelector(s);
 document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
  clearResult();
- state.start=b.dataset.start; state.role="crystal";
- document.querySelectorAll("[data-role]").forEach(x=>x.classList.toggle("active",x.dataset.role===state.role));
+ state.start=b.dataset.start;
  document.querySelectorAll("[data-start]").forEach(x=>x.classList.remove("active")); b.classList.add("active");
- $("#rolePanel").classList.remove("hidden"); showDetect();
-});
-document.querySelectorAll("[data-role]").forEach(b=>b.onclick=()=>{
- state.role=b.dataset.role; document.querySelectorAll("[data-role]").forEach(x=>x.classList.remove("active"));b.classList.add("active");
- if(state.seed)render();
+ showDetect();
 });
 function clearResult(){
- if(state.interval)clearInterval(state.interval);
- state.seed=null;state.route=[];state.done=new Set();state.timer=0;state.interval=null;
+ state.seed=null;state.route=[];state.done=new Set();
  $("#result").classList.add("hidden");
- $("#timerStart").textContent="タイマー";updateTimer();
 }
 function showDetect(){
  $("#detect").classList.remove("hidden");
@@ -92,8 +85,6 @@ window.answer=function(ans){
  if(next) renderQuestion(next);
 };
 function setSeed(seed){
- if(state.interval)clearInterval(state.interval);
- state.interval=null;state.timer=0;$("#timerStart").textContent="タイマー";updateTimer();
  state.seed=seed; state.route=[...routeData[state.start].routes[seed]].slice(0,4);
  state.done=new Set();
  $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase(); $("#seed").style.color=colors[seed.toUpperCase()];
@@ -106,7 +97,7 @@ function render(){
  const nextIdx=state.route.findIndex((_,i)=>!state.done.has(i));
  if(nextIdx<0){$("#next").textContent="4個回収完了";$("#nextMeta").textContent="中央の大結晶へ。";}else{
   $("#next").textContent=`${nextIdx+1}　${state.route[nextIdx]}`;
-  $("#nextMeta").textContent=state.role==="growth"?"育成担当：結晶ルートは参考。味方の結晶進捗を確認してください。":"最優先目的地";
+  $("#nextMeta").textContent="最優先目的地";
  }
  $("#route").innerHTML=state.route.map((name,i)=>`
  <div class="routeItem ${state.done.has(i)?"done":""}">
@@ -114,9 +105,6 @@ function render(){
   <div class="routeBtns"><button onclick="toggleDone(${i})">${state.done.has(i)?"未回収に戻す":"回収済み"}</button></div>
  </div>`).join("");
  drawMap();
- const advice=state.role==="crystal"?"結晶担当：NEXTを優先。味方が取ったら即座に「回収済み」。":
- state.role==="growth"?"育成担当：教会・拠点・強敵は固定配置/検証情報が不足するため、現版では結晶以外の具体座標を自動指定しません。":"フレックス：結晶NEXTを基準にしつつ、味方の育成状況に応じて離脱してください。";
- $("#roleAdvice").textContent=advice;
 }
 window.toggleDone=function(i){if(!Number.isInteger(i)||i<0||i>=state.route.length)return;state.done.has(i)?state.done.delete(i):state.done.add(i);render();};
 function drawMap(){
@@ -138,19 +126,13 @@ function drawMap(){
   const lab=el("text",{x:o.p[0]+30,y:o.p[1]-18,fill:done?"#777":"#ddd","font-size":"14","font-weight":"700"});lab.textContent=o.name;
  });
 }
-document.querySelectorAll("[data-time]").forEach(b=>b.onclick=()=>{state.timer=+b.dataset.time;updateTimer();});
-$("#timerStart").onclick=()=>{
- if(state.interval){clearInterval(state.interval);state.interval=null;$("#timerStart").textContent="タイマー";return;}
- if(!state.timer)state.timer=600; $("#timerStart").textContent="停止";
- state.interval=setInterval(()=>{state.timer--;updateTimer();if(state.timer<=0){clearInterval(state.interval);state.interval=null;$("#timerStart").textContent="タイマー";}},1000);
-};
-function updateTimer(){let m=Math.floor(state.timer/60),s=String(state.timer%60).padStart(2,"0");$("#timer").textContent=state.timer?`${m}:${s}`:"—";}
 $("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"repair-20261008",start:state.start,role:state.role,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],timer:state.timer,mapMissing:state.route.filter(n=>!pos[n])};
+ const data={version:"simple-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mapMissing:state.route.filter(n=>!pos[n])};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
  catch{$("#diagnosticMessage").textContent="下の診断情報を選択してコピーしてください。";}
 };
+

@@ -28,16 +28,6 @@
   </div>
 </section>
 
-<section id="rolePanel" class="panel hidden">
-  <div class="step">ROLE</div>
-  <h2>あなたの役割</h2>
-  <div class="grid3">
-    <button data-role="crystal">結晶担当</button>
-    <button data-role="growth">育成担当</button>
-    <button data-role="flex">フレックス</button>
-  </div>
-</section>
-
 <section id="detect" class="panel hidden">
   <div class="step">02 / SEED DETECTION</div>
   <div id="question"></div>
@@ -60,16 +50,7 @@
     <div id="nextMeta" class="muted"></div>
   </div>
 
-  <div class="timerRow">
-    <button data-time="600">10分</button>
-    <button data-time="480">8分</button>
-    <button data-time="300">5分</button>
-    <button data-time="180">3分</button>
-    <button id="timerStart">タイマー</button>
-  </div>
-  <div id="timer" class="timer">—</div>
-
-  <div class="route" id="route"></div>
+<div class="route" id="route"></div>
 
   <div class="mapWrap">
     <div class="mapTitle">TACTICAL MAP / SCHEMATIC</div>
@@ -82,7 +63,6 @@
   </div>
 
   <div id="status" class="status"></div>
-  <div class="roleAdvice" id="roleAdvice"></div>
   <button id="reset" class="secondary">最初から</button>
 </section>
 
@@ -102,3 +82,4 @@
 <script src="app.js"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
+
