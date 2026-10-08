@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=simple-20261008">
+<link rel="stylesheet" href="style.css?v=source-check-20261008">
 <title>GREAT HOLLOW ROUTER</title>
 </head>
 <body>
@@ -23,8 +23,8 @@
   <h2>開始地点</h2>
   <div class="grid3">
     <button data-start="south">南</button>
-    <button data-start="kaiden">北東・カイデン</button>
-    <button data-start="north">北・教会</button>
+    <button data-start="kaiden">カイデン兵の開始地点</button>
+    <button data-start="north">教会の開始地点</button>
   </div>
 </section>
 
@@ -74,12 +74,14 @@
 
 <section class="panel warning">
   <div class="step">DATA INTEGRITY</div>
-  <p><b>推測禁止。</b> このプロトタイプの結晶ルート名はプレイヤー検証済みルート表を元にしています。マップ上の座標は公式ゲーム座標ではなく、方向関係を示す<b>模式配置</b>です。</p>
+  <p><b>資料照合済み／実機未確認。</b> 結晶の判定条件と12ルートの地点・順序をプレイヤー作成のルート表と照合しました。現行ゲームでの一致と、各地点への移動は未検証です。地図は<b>模式配置</b>で、実際の位置・経路を示すものではありません。</p>
+  <p><a href="https://docs.google.com/spreadsheets/d/1TKQzHILCI2jmb5qP7H0ke_ov2Z4Qw_Dj4n59nDWSHSE/edit" target="_blank" rel="noopener noreferrer">元のルート表・ルート動画</a></p>
   <p>未確認の霊脈・教会・拠点・商人・強敵の座標はルート計算に使用していません。現行版との完全一致も未確認です。</p>
 </section>
 </main>
 
-<script src="app.js?v=simple-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=source-check-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
+
 

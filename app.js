@@ -15,17 +15,17 @@ const routeData = {
  },
  kaiden:{
   detect:[
-   {q:"飛行中／見晴らしの結晶は？",yes:"red",no:"ruins"},
-   {q:"毒/血の廃墟側の結晶は？",yes:"blue",no:"central"},
-   {q:"中央側の緑チェック結晶は？",yes:"green",no:"purple"}
+   {q:"毒／血の廃墟内に結晶は？",yes:"blue",no:"belowRuins"},
+   {q:"毒／血の廃墟の下に結晶は？",yes:"green",no:"overlook"},
+   {q:"中央の見晴らし地点に結晶は？",yes:"red",no:"purple"}
   ],
   routes:{
-   red:["カイデン周辺","北塔下","中央見晴らし","中央","南・カイデン間"],
-   blue:["カイデン後","毒/血の廃墟","アリ道","南・カイデン間","北東の木の端"],
-   green:["カイデン後・下側","毒/血の廃墟下","中央","中央橋","最終橋の南"],
+   red:["北塔下","中央見晴らし","中央","南・カイデン間"],
+   blue:["毒/血の廃墟","アリ道","南・カイデン間","北東の木の端"],
+   green:["毒/血の廃墟下","中央","中央橋","最終橋の南"],
    purple:["北塔下","中央橋","アリ道","木の下"]
   },
-  checks:"北東カイデン：飛行中の見晴らし→廃墟側→中央側の順。飛行中に見える位置は描画距離等で確認しにくい場合があります。",
+  checks:"カイデン：廃墟内→廃墟の下→中央の見晴らしの順。最初の2地点がなければ、廃墟の先・北塔下の結晶を経由し、霊脈で中央の見晴らしを確認します。見える位置まで移動して確認してください。未確認・味方が破壊済みの場合は「ない」で判定しないでください。",
  },
  north:{
   detect:[
@@ -85,7 +85,7 @@ window.answer=function(ans){
  if(next) renderQuestion(next);
 };
 function setSeed(seed){
- state.seed=seed; state.route=[...routeData[state.start].routes[seed]].slice(0,4);
+ state.seed=seed; state.route=[...routeData[state.start].routes[seed]];
  state.done=new Set();
  $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase(); $("#seed").style.color=colors[seed.toUpperCase()];
  $("#status").textContent=`確認済みルート表ベース。3人マルチでは4個が必要。チームが途中の結晶を取った場合は、その地点を「回収済み」にしてください。`;
@@ -129,10 +129,11 @@ function drawMap(){
 $("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"simple-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mapMissing:state.route.filter(n=>!pos[n])};
+ const data={version:"source-check-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mapMissing:state.route.filter(n=>!pos[n])};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
  catch{$("#diagnosticMessage").textContent="下の診断情報を選択してコピーしてください。";}
 };
+
 
