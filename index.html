@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=detection-map-20261008">
+<link rel="stylesheet" href="style.css?v=candidate-map-20261009">
 <title>GREAT HOLLOW ROUTER</title>
 </head>
 <body>
 <header>
   <div class="eyebrow">NIGHTREIGN / FORSAKEN HOLLOWS</div>
   <h1>GREAT HOLLOW ROUTER</h1>
-  <div class="version">大空洞 · 結晶4個回収</div>
+  <div class="version">大空洞 · 結晶候補マップ · candidate-map-20261009</div>
 </header>
 
 <main>
@@ -46,22 +46,25 @@
       <div class="step">SEED</div>
       <div id="seed" class="seed">—</div>
     </div>
-    <div class="remaining"><span id="remaining">4</span><small> / 4</small><br><span>残り</span></div>
+    <div class="remaining"><span id="remaining">4</span><small> / 4</small><br><span>あと何個</span></div>
   </div>
 
   <div class="nextBox">
-    <div class="nextLabel">NEXT</div>
+    <div class="nextLabel">CRYSTAL CANDIDATES</div>
     <div id="next">—</div>
     <div id="nextMeta" class="muted"></div>
   </div>
 
 
   <div class="mapWrap">
-    <div class="mapControls"><span>回収順の目安 · 座標未検証</span><button id="zoomMap">地図を拡大</button></div>
+    <div class="mapControls"><span>◆ 候補 / ✓ 回収済み · タップで切替</span><button id="zoomMap">地図を拡大</button></div>
     <div class="mapScroll"><div id="mapViews"></div></div>
     <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
   </div>
 
+  <p class="note">資料上の候補です。全地点の存在は未検証で、地点名・位置も目安です。薄い金枠は資料で開始付近に挙げられた候補です。移動の容易さは未検証です。</p>
+  <div class="teamRecord"><div aria-live="polite">チーム回収記録：<strong id="collectedCount">0</strong>個</div><div class="note">味方の回収も記録してください。同じ結晶は1回だけ数えます。</div>
+  <div class="extraRecord"><span>地図外・場所不明：<strong id="extraCount">0</strong>個</span><button id="extraMinus" aria-label="場所不明の回収を1個減らす">−</button><button id="extraPlus" aria-label="場所不明の回収を1個増やす">＋</button></div></div>
   <div class="route" id="route"></div>
   <div id="status" class="status"></div>
   <button id="reportMismatch" class="secondary">配置が違う・結晶が見つからない</button>
@@ -77,7 +80,7 @@
 
 </main>
 
-<script src="app.js?v=detection-map-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=candidate-map-20261009"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
 

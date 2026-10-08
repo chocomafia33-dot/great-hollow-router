@@ -5,12 +5,6 @@ const routeData = {
    {q:"西側の結晶は？", yes:"ant", no:"green"},
    {q:"アリ道の結晶は？", yes:"blue", no:"red"}
   ],
-  routes:{
-   red:["南・カイデン間","中央","中央見晴らし","北塔下"],
-   blue:["南・カイデン間","アリ道","中央見晴らし","北城・木の右"],
-   green:["毒/血の廃墟下","中央","中央橋","最終橋の南"],
-   purple:["南スタート","アリ道","南側の木の下","北東の木の端"]
-  },
  },
  kaiden:{
   detect:[
@@ -18,12 +12,6 @@ const routeData = {
    {q:"毒／血の廃墟の下に結晶は？",yes:"green",no:"overlook"},
    {q:"中央の見晴らし地点に結晶は？",yes:"red",no:"purple"}
   ],
-  routes:{
-   red:["北塔下","中央見晴らし","中央","南・カイデン間"],
-   blue:["毒/血の廃墟","アリ道","南・カイデン間","北東の木の端"],
-   green:["毒/血の廃墟下","中央","中央橋","最終橋の南"],
-   purple:["北塔下","中央橋","アリ道","木の下"]
-  },
  },
  north:{
   detect:[
@@ -31,12 +19,6 @@ const routeData = {
    {q:"滝側の結晶は？",yes:"green",no:"alcove"},
    {q:"地下アルコーブの結晶は？",yes:"blue",no:"purple"}
   ],
-  routes:{
-   red:["開始地点","地下教会への途中","中央","中央見晴らし"],
-   green:["開始地点南側","北城へ向かう橋の先","中央橋","中央"],
-   blue:["北東の木の端","地下アルコーブ","北城・木の右","中央見晴らし"],
-   purple:["北東の木の端","地下北西","南の木の下","アリ道"]
-  },
  }
 };
 
@@ -70,7 +52,206 @@ const detectionPoints={
  kaiden:["毒/血の廃墟","毒/血の廃墟下","中央見晴らし"],
  north:["開始地点","開始地点南側","地下アルコーブ"]
 };
-let state={start:null,seed:null,route:[],done:new Set(),mismatch:false};
+// Candidate coordinates and distribution membership transcribed from Nightreign Hub.
+// Source checked 2026-10-09. Group 1=blue, 2=purple, 3=red, 4=green.
+// Coordinates are image-relative; existing landmark names remain provisional.
+// These historical distributions do not guarantee current in-game spawns.
+const candidatePoints = [
+ {
+  "id": "g1-1",
+  "x": 22.58,
+  "y": 92.11,
+  "zone": "top",
+  "name": "南・カイデン間"
+ },
+ {
+  "id": "g1-2",
+  "x": 17.03,
+  "y": 67.92,
+  "zone": "top",
+  "name": "毒/血の廃墟"
+ },
+ {
+  "id": "g1-3",
+  "x": 35.3,
+  "y": 70.43,
+  "zone": "top",
+  "name": "南側の木の下"
+ },
+ {
+  "id": "g1-4",
+  "x": 30.29,
+  "y": 41.22,
+  "zone": "top",
+  "name": "中央見晴らし"
+ },
+ {
+  "id": "g1-5",
+  "x": 41.94,
+  "y": 20.07,
+  "zone": "top",
+  "name": "北城・木の右"
+ },
+ {
+  "id": "g1-6",
+  "x": 74.19,
+  "y": 44.27,
+  "zone": "top",
+  "name": "北東の木の端"
+ },
+ {
+  "id": "g1-7",
+  "x": 64.16,
+  "y": 51.97,
+  "zone": "bottom",
+  "name": "地下アルコーブ"
+ },
+ {
+  "id": "g1-8",
+  "x": 44.27,
+  "y": 65.77,
+  "zone": "bottom",
+  "name": "地下北西"
+ },
+ {
+  "id": "g2-1",
+  "x": 40.86,
+  "y": 95.88,
+  "zone": "top",
+  "name": "南スタート"
+ },
+ {
+  "id": "g2-2",
+  "x": 50.54,
+  "y": 76.88,
+  "zone": "top",
+  "name": "アリ道"
+ },
+ {
+  "id": "g2-3",
+  "x": 10.93,
+  "y": 48.57,
+  "zone": "top",
+  "name": "北塔下"
+ },
+ {
+  "id": "g2-4",
+  "x": 37.28,
+  "y": 48.03,
+  "zone": "top",
+  "name": "中央橋"
+ },
+ {
+  "id": "g2-5",
+  "x": 91.04,
+  "y": 48.75,
+  "zone": "bottom",
+  "name": "地下候補（東側）"
+ },
+ {
+  "id": "g3-1",
+  "x": 41.22,
+  "y": 61.65,
+  "zone": "top",
+  "name": "中央"
+ },
+ {
+  "id": "g3-2",
+  "x": 82.8,
+  "y": 19.89,
+  "zone": "top",
+  "name": "教会の開始地点"
+ },
+ {
+  "id": "g3-3",
+  "x": 47.31,
+  "y": 83.15,
+  "zone": "bottom",
+  "name": "地下候補（南西側）"
+ },
+ {
+  "id": "g3-4",
+  "x": 82.97,
+  "y": 86.38,
+  "zone": "bottom",
+  "name": "最終橋の南"
+ },
+ {
+  "id": "g3-5",
+  "x": 74.37,
+  "y": 24.37,
+  "zone": "bottom",
+  "name": "地下教会への途中"
+ },
+ {
+  "id": "g4-1",
+  "x": 4.66,
+  "y": 68.1,
+  "zone": "top",
+  "name": "毒/血の廃墟下"
+ },
+ {
+  "id": "g4-2",
+  "x": 54.3,
+  "y": 38.35,
+  "zone": "top",
+  "name": "北城へ向かう橋の先"
+ },
+ {
+  "id": "g4-3",
+  "x": 87.28,
+  "y": 43.37,
+  "zone": "top",
+  "name": "教会の開始地点南側"
+ }
+];
+const candidateGroups = {
+ "blue": [
+  "g1-1",
+  "g1-2",
+  "g1-3",
+  "g1-4",
+  "g1-5",
+  "g1-6",
+  "g1-7",
+  "g1-8"
+ ],
+ "purple": [
+  "g1-3",
+  "g2-1",
+  "g2-2",
+  "g2-3",
+  "g2-4",
+  "g1-6",
+  "g1-8",
+  "g2-5"
+ ],
+ "red": [
+  "g1-1",
+  "g2-3",
+  "g3-1",
+  "g1-4",
+  "g3-2",
+  "g3-3",
+  "g3-4",
+  "g3-5"
+ ],
+ "green": [
+  "g4-1",
+  "g3-1",
+  "g2-4",
+  "g4-2",
+  "g4-3",
+  "g2-5",
+  "g3-4",
+  "g3-3"
+ ]
+};
+// Only direct start/near-start entries supported by the supplied route table.
+// Highlight means a source suggestion, not verified travel ease or a fixed order.
+const startHints={south:{purple:["g2-1"]},kaiden:{blue:["g1-2"],green:["g4-1"]},north:{red:["g3-2"],green:["g4-3"]}};
+function hasStartHint(id){return (startHints[state.start]?.[state.seed]||[]).includes(id);}
+let state={start:null,seed:null,candidates:[],done:new Set(),extra:0,mismatch:false};
 
 const $=s=>document.querySelector(s);
 document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
@@ -80,7 +261,7 @@ document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
  showDetect();
 });
 function clearResult(){
- state.seed=null;state.route=[];state.done=new Set();state.mismatch=false;
+ state.seed=null;state.candidates=[];state.done=new Set();state.extra=0;state.mismatch=false;
  $("#result").classList.add("hidden");
 }
 function showDetect(){
@@ -117,43 +298,44 @@ window.answer=function(ans){
 };
 function setSeed(seed){
  $("#detect").classList.add("hidden");
- state.seed=seed; state.route=[...routeData[state.start].routes[seed]];
- state.done=new Set();state.mismatch=false;
+ state.seed=seed; state.candidates=candidateGroups[seed].map(id=>candidatePoints.find(p=>p.id===id));
+ state.done=new Set();state.extra=0;state.mismatch=false;
  $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase()+" 候補"; $("#seed").style.color=colors[seed.toUpperCase()];
  $("#status").textContent="";
  render();
 }
 function render(){
- const remaining=state.route.filter((_,i)=>!state.done.has(i)).length;
- $("#remaining").textContent=remaining;
- const nextIdx=state.route.findIndex((_,i)=>!state.done.has(i));
- if(state.mismatch){$("#next").textContent="案内を保留中";$("#nextMeta").textContent="回収記録は保持しています。";}else if(nextIdx<0){$("#next").textContent="4個回収完了";$("#nextMeta").textContent="中央の大結晶へ。";}else{
-  $("#next").textContent=`${nextIdx+1}　${state.route[nextIdx]}`;
-  $("#nextMeta").textContent="最優先目的地";
- }
- $("#route").innerHTML=state.route.map((name,i)=>`
- <div class="routeItem ${state.done.has(i)?"done":""}">
-  <div class="routeNum">CRYSTAL ${i+1}</div><div class="routeName">${name}</div>
-  <div class="routeBtns"><button onclick="toggleDone(${i})">${state.done.has(i)?"未回収に戻す":"回収済み"}</button></div>
+ const count=state.done.size+state.extra;
+ $("#remaining").textContent=Math.max(0,4-count);
+ $("#next").textContent=state.mismatch?"配置判定を保留中":count>=4?"4個回収を記録済み":"資料上の結晶候補地点";
+ $("#nextMeta").textContent=state.mismatch?"候補表示を保留しています。回収記録は保持しています。":count>=4?"実際の解放状況はゲーム内で確認してください。":"収縮や味方の動きを見て、回収順を決めてください。";
+ $("#collectedCount").textContent=count;
+ $("#extraCount").textContent=state.extra;
+ $("#extraMinus").disabled=state.extra===0;
+ $("#route").innerHTML=state.candidates.map(p=>`
+ <div class="routeItem ${state.done.has(p.id)?"done":""}">
+  <div class="routeNum">${p.zone==="top"?"地上":"地下"} · ${hasStartHint(p.id)&&!state.mismatch?"資料で開始付近の候補":"候補"}</div><div class="routeName">${p.name}</div>
+  <div class="routeBtns"><button data-crystal="${p.id}" aria-pressed="${state.done.has(p.id)}">${state.done.has(p.id)?"未回収に戻す":"回収済みにする"}</button></div>
  </div>`).join("");
  drawMap();
 }
-window.toggleDone=function(i){if(!Number.isInteger(i)||i<0||i>=state.route.length)return;state.done.has(i)?state.done.delete(i):state.done.add(i);render();};
+function toggleDone(id){
+ if(!state.candidates.some(p=>p.id===id))return;
+ state.done.has(id)?state.done.delete(id):state.done.add(id);render();
+}
+$("#route").addEventListener("click",e=>{const b=e.target.closest("[data-crystal]");if(b)toggleDone(b.dataset.crystal);});
+$("#mapViews").addEventListener("click",e=>{const b=e.target.closest("[data-crystal]");if(b)toggleDone(b.dataset.crystal);});
+$("#extraPlus").onclick=()=>{state.extra++;render();};
+$("#extraMinus").onclick=()=>{state.extra=Math.max(0,state.extra-1);render();};
 function drawMap(){
- const points=state.route.map(name=>mapPoints[name]);
- const next=state.route.findIndex((_,i)=>!state.done.has(i));
  const tint=colors[state.seed.toUpperCase()];
- $("#mapViews").innerHTML=["top","bottom"].filter(zone=>points.some(p=>p.zone===zone)).map(zone=>{
-  let lines="",marks="";
-  points.forEach((p,i)=>{
-   if(p.zone!==zone)return;
-   const x=p.x*10,y=p.y*10;
-   const previous=points[i-1];
-   if(previous&&previous.zone===zone)lines+=`<path d="M${previous.x*10} ${previous.y*10} L${x} ${y}" fill="none" stroke="#fff" stroke-width="12" opacity=".8"/><path d="M${previous.x*10} ${previous.y*10} L${x} ${y}" fill="none" stroke="${tint}" stroke-width="7" stroke-dasharray="16 12" marker-end="url(#arrow-${zone})"/>`;
-   const done=state.done.has(i),active=i===next&&!state.mismatch;
-   marks+=`<g class="map-marker${done?" collected":""}" opacity="${done?.35:1}"><title>${i+1} ${state.route[i]}${done?" 回収済み":""}</title>${active?`<circle cx="${x}" cy="${y}" r="34" fill="none" stroke="#fff" stroke-width="6"/>`:""}<circle cx="${x}" cy="${y}" r="25" fill="${done?"#666":tint}" stroke="#08090b" stroke-width="5"/><text x="${x}" y="${y+1}" text-anchor="middle" dominant-baseline="central" fill="#fff" font-size="31" font-weight="900">${i+1}</text>${done?`<text x="${x+28}" y="${y-27}" fill="#fff" font-size="27">✓</text>`:""}</g>`;
-  });
-  return `<section class="mapLayer"><div class="mapTitle">${zone==="top"?"地上":"地下"}</div><svg viewBox="0 0 1000 1000" role="img" aria-label="${zone==="top"?"地上":"地下"}の回収順。番号は下のルート一覧と対応"><defs><marker id="arrow-${zone}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="${tint}"/></marker></defs><image href="map-${zone==="top"?"top":"bottom"}.webp" width="1000" height="1000"/>${lines}${marks}</svg></section>`;
+ $("#mapViews").innerHTML=["top","bottom"].map(zone=>{
+  const points=state.candidates.filter(p=>p.zone===zone);
+  const marks=state.mismatch?"":points.map(p=>{
+   const done=state.done.has(p.id);
+   return `<button type="button" class="crystalMarker ${done?"collected":""} ${hasStartHint(p.id)?"startHint":""}" data-crystal="${p.id}" style="left:${p.x}%;top:${p.y}%;--marker-color:${tint}" aria-label="${p.name}（候補・位置は目安）：${done?"未回収に戻す":"回収済みにする"}" aria-pressed="${done}" title="${p.name}"><span aria-hidden="true">${done?"✓":"◆"}</span></button>`;
+  }).join("");
+  return `<section class="mapLayer"><div class="mapTitle">${zone==="top"?"地上":"地下"} · ${state.mismatch?"候補表示を保留":points.length+"候補"}</div><div class="candidateMap"><img src="map-${zone}.webp" alt="${zone==="top"?"地上":"地下"}の地図" draggable="false">${marks}</div></section>`;
  }).join("");
 }
 $("#zoomMap").onclick=()=>{
@@ -163,13 +345,13 @@ $("#zoomMap").onclick=()=>{
 };
 $("#reportMismatch").onclick=()=>{
  state.mismatch=true;
- $("#status").textContent="案内を保留中。開始地点を選び直すと再判定できます。";
+ $("#status").textContent="配置判定を保留中。開始地点を選び直すと再判定できます。";
  render();
 };
 $("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"detection-map-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
+ const data={version:"candidate-map-20261009",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),done:[...state.done],extraCollected:state.extra,totalCollected:state.done.size+state.extra,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
