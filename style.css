@@ -53,3 +53,7 @@ button.active{border-color:var(--gold);box-shadow:0 0 0 1px #c7a86b55 inset;colo
 .mapLayer svg{display:block;width:100%;height:auto;background:#171714}
 #mapViews.zoomed{width:900px}
 .mapCredit{padding:6px 10px;font-size:9px;color:#777}
+
+#detectMapViews.zoomed{width:900px}
+.detectMapScroll{max-height:52vh}
+#answers{margin-top:12px}

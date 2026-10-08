@@ -65,6 +65,11 @@ const mapPoints={
  "地下アルコーブ":{x:64.16,y:51.97,zone:"bottom"},
  "地下北西":{x:44.27,y:65.77,zone:"bottom"}
 };
+const detectionPoints={
+ south:["南スタート","南・カイデン間","アリ道"],
+ kaiden:["毒/血の廃墟","毒/血の廃墟下","中央見晴らし"],
+ north:["開始地点","開始地点南側","地下アルコーブ"]
+};
 let state={start:null,seed:null,route:[],done:new Set(),mismatch:false};
 
 const $=s=>document.querySelector(s);
@@ -87,7 +92,19 @@ function renderQuestion(node){
  $("#answers").innerHTML=`<button onclick="answer('yes')">ある</button><button onclick="answer('no')">ない</button><button onclick="answer('unknown')">未確認</button>`;
  $("#detectNote").textContent="";
  state.currentNode=node;
+ drawDetectionMap(node);
 }
+function drawDetectionMap(node){
+ const index=routeData[state.start].detect.indexOf(node);
+ const name=detectionPoints[state.start][index];
+ const p=mapPoints[name],x=p.x*10,y=p.y*10;
+ $("#detectMapViews").innerHTML=`<section class="mapLayer"><div class="mapTitle">${p.zone==="top"?"地上":"地下"} · 確認する地点</div><svg viewBox="-30 -30 1060 1060" role="img" aria-label="${node.q}。丸で囲んだ地点を確認"><image href="map-${p.zone==="top"?"top":"bottom"}.webp" width="1000" height="1000"/><circle cx="${x}" cy="${y}" r="48" fill="#f8d77b" fill-opacity=".18" stroke="#08090b" stroke-width="15"/><circle cx="${x}" cy="${y}" r="48" fill="none" stroke="#f8d77b" stroke-width="8"/><path d="M${x-68} ${y}H${x-38} M${x+38} ${y}H${x+68} M${x} ${y-68}V${y-38} M${x} ${y+38}V${y+68}" stroke="#fff" stroke-width="5"/><circle cx="${x}" cy="${y}" r="8" fill="#fff"/><title>${name}</title></svg></section>`;
+}
+$("#zoomDetectMap").onclick=()=>{
+ const zoomed=$("#detectMapViews").classList.contains("zoomed");
+ $("#detectMapViews").classList.toggle("zoomed",!zoomed);
+ $("#zoomDetectMap").textContent=zoomed?"地図を拡大":"拡大を戻す";
+};
 window.answer=function(ans){
  if(ans==="unknown"){$("#detectNote").textContent="判定を保留中";return;}
  if(!["yes","no"].includes(ans))return;
@@ -99,6 +116,7 @@ window.answer=function(ans){
  if(next) renderQuestion(next);
 };
 function setSeed(seed){
+ $("#detect").classList.add("hidden");
  state.seed=seed; state.route=[...routeData[state.start].routes[seed]];
  state.done=new Set();state.mismatch=false;
  $("#result").classList.remove("hidden"); $("#seed").textContent=seed.toUpperCase()+" 候補"; $("#seed").style.color=colors[seed.toUpperCase()];
@@ -151,7 +169,7 @@ $("#reportMismatch").onclick=()=>{
 $("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"real-map-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
+ const data={version:"detection-map-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
