@@ -1,5 +1,5 @@
-const CACHE="gh-router-route-guidance-20261008";
-const ASSETS=["./","./index.html","./style.css?v=route-guidance-20261008","./app.js?v=route-guidance-20261008","./manifest.webmanifest"];
+const CACHE="gh-router-real-map-20261008";
+const ASSETS=["./","./index.html","./style.css?v=real-map-20261008","./app.js?v=real-map-20261008","./manifest.webmanifest","./map-top.webp","./map-bottom.webp"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("gh-router-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{

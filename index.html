@@ -7,14 +7,14 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=route-guidance-20261008">
+<link rel="stylesheet" href="style.css?v=real-map-20261008">
 <title>GREAT HOLLOW ROUTER</title>
 </head>
 <body>
 <header>
   <div class="eyebrow">NIGHTREIGN / FORSAKEN HOLLOWS</div>
   <h1>GREAT HOLLOW ROUTER</h1>
-  <div class="version">Prototype • Crystal dataset: 1.03.2 target / Game App: 1.03.2 • Regulation: 1.03.5</div>
+  <div class="version">大空洞 · 結晶4個回収</div>
 </header>
 
 <main>
@@ -50,19 +50,14 @@
     <div id="nextMeta" class="muted"></div>
   </div>
 
-<div class="route" id="route"></div>
 
   <div class="mapWrap">
-    <div class="mapTitle">結晶の位置・移動経路を確認</div>
-    <div style="padding:12px;line-height:1.8">
-      <p><a id="routeVideo" target="_blank" rel="noopener noreferrer">このルートの動画を開く</a></p>
-      <p><a href="https://nightreignhub.appforgelabs.com/great-hollow-map" target="_blank" rel="noopener noreferrer">地上・地下の結晶参考地図を開く</a></p>
-      <p><a href="https://www.reddit.com/r/Nightreign/comments/1pljy7p/the_great_hollow_crystals_definitive_map/" target="_blank" rel="noopener noreferrer">色別配置図・作成者の補足を開く</a></p>
-      <div id="mapNote" class="note"></div>
-    </div>
+    <div class="mapControls"><span>回収順の目安 · 座標未検証</span><button id="zoomMap">地図を拡大</button></div>
+    <div class="mapScroll"><div id="mapViews"></div></div>
+    <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
   </div>
 
-  <div class="note" id="movementNote"></div>
+  <div class="route" id="route"></div>
   <div id="status" class="status"></div>
   <button id="reportMismatch" class="secondary">配置が違う・結晶が見つからない</button>
   <button id="reset" class="secondary">最初から</button>
@@ -74,15 +69,10 @@
   <textarea id="diagnosticText" class="hidden" readonly aria-label="診断情報" style="width:100%;min-height:180px;margin-top:8px"></textarea>
 </section>
 
-<section class="panel warning">
-  <div class="step">DATA INTEGRITY</div>
-  <p><b>従来4色の資料に基づく候補／実機未確認。</b> 結晶の判定条件と12ルートの地点・順序をプレイヤー作成のルート表と照合しました。現行ゲームでの一致と、各地点への移動は未検証です。追加結晶や更新後の配置変更が報告されており、4色判定だけでは一致しない場合があります。位置確認には、結果画面の参考地図と該当ルート動画を使用してください。</p>
-  <p><a href="https://docs.google.com/spreadsheets/d/1TKQzHILCI2jmb5qP7H0ke_ov2Z4Qw_Dj4n59nDWSHSE/edit" target="_blank" rel="noopener noreferrer">元のルート表・ルート動画</a></p>
-  <p>未確認の霊脈・教会・拠点・商人・強敵の座標はルート計算に使用していません。現行版との完全一致も未確認です。</p>
-</section>
+
 </main>
 
-<script src="app.js?v=route-guidance-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=real-map-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
 
