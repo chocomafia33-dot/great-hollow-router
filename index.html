@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=source-check-20261008">
+<link rel="stylesheet" href="style.css?v=location-reference-20261008">
 <title>GREAT HOLLOW ROUTER</title>
 </head>
 <body>
@@ -53,13 +53,13 @@
 <div class="route" id="route"></div>
 
   <div class="mapWrap">
-    <div class="mapTitle">TACTICAL MAP / SCHEMATIC</div>
-    <svg id="map" viewBox="0 0 1000 760" role="img" aria-label="Great Hollow schematic map"></svg>
-    <div class="mapLegend">
-      <span><i class="dot crystal"></i>推奨結晶</span>
-      <span><i class="line"></i>ルート</span>
+    <div class="mapTitle">結晶の位置・移動経路を確認</div>
+    <div style="padding:12px;line-height:1.8">
+      <p><a id="routeVideo" target="_blank" rel="noopener noreferrer">このルートの動画を開く</a></p>
+      <p><a href="https://nightreignhub.appforgelabs.com/great-hollow-map" target="_blank" rel="noopener noreferrer">地上・地下の結晶参考地図を開く</a></p>
+      <p><a href="https://www.reddit.com/r/Nightreign/comments/1pljy7p/the_great_hollow_crystals_definitive_map/" target="_blank" rel="noopener noreferrer">色別配置図・作成者の補足を開く</a></p>
+      <div id="mapNote" class="note"></div>
     </div>
-    <div id="mapNote" class="note" aria-live="polite"></div>
   </div>
 
   <div id="status" class="status"></div>
@@ -74,14 +74,15 @@
 
 <section class="panel warning">
   <div class="step">DATA INTEGRITY</div>
-  <p><b>資料照合済み／実機未確認。</b> 結晶の判定条件と12ルートの地点・順序をプレイヤー作成のルート表と照合しました。現行ゲームでの一致と、各地点への移動は未検証です。地図は<b>模式配置</b>で、実際の位置・経路を示すものではありません。</p>
+  <p><b>資料照合済み／実機未確認。</b> 結晶の判定条件と12ルートの地点・順序をプレイヤー作成のルート表と照合しました。現行ゲームでの一致と、各地点への移動は未検証です。位置確認には、結果画面の参考地図と該当ルート動画を使用してください。</p>
   <p><a href="https://docs.google.com/spreadsheets/d/1TKQzHILCI2jmb5qP7H0ke_ov2Z4Qw_Dj4n59nDWSHSE/edit" target="_blank" rel="noopener noreferrer">元のルート表・ルート動画</a></p>
   <p>未確認の霊脈・教会・拠点・商人・強敵の座標はルート計算に使用していません。現行版との完全一致も未確認です。</p>
 </section>
 </main>
 
-<script src="app.js?v=source-check-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=location-reference-20261008"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>
+
 
 

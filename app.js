@@ -44,13 +44,10 @@ const routeData = {
 };
 
 const colors={RED:"#c86c6c",BLUE:"#6fa5db",GREEN:"#82b97b",PURPLE:"#a98bc9"};
-const pos={
- "南・カイデン間":[210,600],"中央":[500,410],"中央見晴らし":[565,300],"北塔下":[720,150],
- "アリ道":[380,540],"北城・木の右":[790,230],"毒/血の廃墟下":[300,350],"中央橋":[470,360],
- "最終橋の南":[610,500],"南スタート":[180,620],"南側の木の下":[350,620],"北東の木の端":[820,120],
- "カイデン周辺":[800,120],"カイデン後":[760,210],"毒/血の廃墟":[330,300],"北塔下":[720,150],
- "木の下":[600,600],"開始地点":[820,110],"地下教会への途中":[730,420],"開始地点南側":[760,250],
- "北城へ向かう橋の先":[780,330],"地下アルコーブ":[670,540],"地下北西":[270,540]
+const routeVideos={
+ south:{red:"W6m01kvV46E",blue:"_dkyk3RStr4",green:"eLTu0nYEzuI",purple:"kwfA5vjK46s"},
+ kaiden:{red:"NzcYpxCDdio",blue:"tzfN1NTmEJM",green:"y3Xk85p9n3Y",purple:"tE7UN9yONbk"},
+ north:{red:"7nGSpGAcBD4",blue:"6rVA0JYXS2I",green:"Ct0LhToSzjY",purple:"31EuBaCaD4g"}
 };
 
 let state={start:null,seed:null,route:[],done:new Set()};
@@ -108,32 +105,20 @@ function render(){
 }
 window.toggleDone=function(i){if(!Number.isInteger(i)||i<0||i>=state.route.length)return;state.done.has(i)?state.done.delete(i):state.done.add(i);render();};
 function drawMap(){
- const svg=$("#map"); svg.innerHTML="";
- const NS="http://www.w3.org/2000/svg";
- const el=(tag,attrs)=>{const e=document.createElementNS(NS,tag);Object.entries(attrs).forEach(([k,v])=>e.setAttribute(k,v));svg.appendChild(e);return e};
- // schematic terrain
- el("path",{d:"M90 150 Q260 50 430 120 T760 80 Q900 170 840 330 T900 620 Q700 720 500 650 T150 690 Q60 520 110 360Z",fill:"#171b1d",stroke:"#3b4145","stroke-width":"4"});
- el("path",{d:"M160 470 Q350 390 500 430 T820 330",fill:"none",stroke:"#31373a","stroke-width":"28","stroke-linecap":"round"});
- el("path",{d:"M300 150 Q450 260 520 360 T700 600",fill:"none",stroke:"#292f31","stroke-width":"22","stroke-linecap":"round"});
- const missing=state.route.filter(n=>!pos[n]);
- $("#mapNote").textContent=missing.length?`座標未登録のため地図には表示していません：${missing.join("、")}。場所はルート一覧で確認してください。`:"模式図です。結晶の実際の座標、移動経路は未検証です。";
- const pts=state.route.map((n,i)=>({name:n,p:pos[n],i})).filter(o=>o.p);
- for(let i=0;i<pts.length-1;i++)if(pts[i+1].i===pts[i].i+1)el("line",{x1:pts[i].p[0],y1:pts[i].p[1],x2:pts[i+1].p[0],y2:pts[i+1].p[1],stroke:colors[state.seed.toUpperCase()], "stroke-width":"8","stroke-linecap":"round","opacity":".8"});
- pts.forEach(o=>{
-  const done=state.done.has(o.i), next=state.route.findIndex((_,i)=>!state.done.has(i))===o.i;
-  el("circle",{cx:o.p[0],cy:o.p[1],r:next?27:22,fill:done?"#383c40":colors[state.seed.toUpperCase()],stroke:next?"#fff":"#111","stroke-width":next?4:3,opacity:done?".35":"1"});
-  const t=el("text",{x:o.p[0],y:o.p[1]+6,fill:"#08090b","font-size":"17","font-weight":"900","text-anchor":"middle"});t.textContent=o.i+1;
-  const lab=el("text",{x:o.p[0]+30,y:o.p[1]-18,fill:done?"#777":"#ddd","font-size":"14","font-weight":"700"});lab.textContent=o.name;
- });
+ const video=routeVideos[state.start]?.[state.seed];
+ $("#routeVideo").href=video?`https://www.youtube.com/watch?v=${video}`:"https://docs.google.com/spreadsheets/d/1TKQzHILCI2jmb5qP7H0ke_ov2Z4Qw_Dj4n59nDWSHSE/edit";
+ $("#routeVideo").textContent=`${state.seed.toUpperCase()}の回収ルート動画を開く`;
+ $("#mapNote").textContent="参考地図の結晶位置とルート動画を照合してください。地図側の選択は、このアプリの回収状態には連動しません。動画の全経路・現行ゲームでの一致は未検証です。";
 }
 $("#reset").onclick=()=>location.reload();
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"source-check-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],mapMissing:state.route.filter(n=>!pos[n])};
+ const data={version:"location-reference-20261008",start:state.start,question:state.currentNode?.q,seed:state.seed,route:state.route,done:[...state.done],locationVerification:"source-text-only; map/video-reference; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
  catch{$("#diagnosticMessage").textContent="下の診断情報を選択してコピーしてください。";}
 };
+
 
 

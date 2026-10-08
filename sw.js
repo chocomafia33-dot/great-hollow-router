@@ -1,5 +1,5 @@
-const CACHE="gh-router-source-check-20261008";
-const ASSETS=["./","./index.html","./style.css?v=source-check-20261008","./app.js?v=source-check-20261008","./manifest.webmanifest"];
+const CACHE="gh-router-location-reference-20261008";
+const ASSETS=["./","./index.html","./style.css?v=location-reference-20261008","./app.js?v=location-reference-20261008","./manifest.webmanifest"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("gh-router-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
@@ -9,5 +9,6 @@ self.addEventListener("fetch",e=>{
   return response;
  }).catch(()=>caches.match(e.request).then(r=>r||Response.error())));
 });
+
 
 
