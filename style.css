@@ -1,0 +1,48 @@
+*{box-sizing:border-box}
+:root{--bg:#08090b;--panel:#111419;--panel2:#171a20;--line:#30353e;--text:#e5e2d8;--muted:#969a9f;--gold:#c7a86b;--cyan:#8dd6d2;--red:#c86c6c;--blue:#6fa5db;--green:#82b97b;--purple:#a98bc9}
+html,body{margin:0;background:radial-gradient(circle at 50% -10%,#25211b 0,#0b0c0e 35%,#060708 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif}
+body{min-height:100vh;padding-bottom:30px}
+header{padding:calc(18px + env(safe-area-inset-top)) 16px 12px;border-bottom:1px solid #292c31;position:sticky;top:0;background:rgba(7,8,10,.94);backdrop-filter:blur(10px);z-index:10}
+.eyebrow,.step{font-size:11px;letter-spacing:.16em;color:var(--gold);font-weight:700}
+h1{font-size:21px;letter-spacing:.08em;margin:5px 0}
+.version{font-size:10px;color:#777c83}
+main{max-width:760px;margin:auto;padding:12px}
+.panel{background:linear-gradient(180deg,#13161b,#0f1115);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:12px;box-shadow:0 8px 24px #0007}
+h2{font-size:18px;margin:8px 0 12px}
+.hidden{display:none!important}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+button{border:1px solid #454b54;background:linear-gradient(#1d2229,#15181d);color:var(--text);border-radius:9px;padding:15px 8px;font-weight:700;font-size:14px;min-height:52px}
+button:active{transform:translateY(1px);border-color:var(--gold)}
+button.active{border-color:var(--gold);box-shadow:0 0 0 1px #c7a86b55 inset;color:#fff}
+.secondary{width:100%;margin-top:10px;background:#0c0e11;color:#aaa}
+.question{font-size:20px;font-weight:800;margin:12px 0 15px}
+.note{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.resultHead{display:flex;justify-content:space-between;align-items:center}
+.seed{font-size:40px;font-weight:900;letter-spacing:.08em;margin-top:2px}
+.remaining{text-align:right;font-size:28px;font-weight:900;color:var(--gold);line-height:.9}
+.remaining small{font-size:14px;color:#777}
+.remaining span:last-child{font-size:11px;color:#888;font-weight:600}
+.nextBox{margin:12px 0;padding:14px;border:1px solid #665637;background:#17150f;border-radius:10px}
+.nextLabel{font-size:10px;color:var(--gold);letter-spacing:.2em}
+#next{font-size:25px;font-weight:900;margin:5px 0}
+.muted{font-size:11px;color:var(--muted)}
+.timerRow{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin:8px 0}
+.timerRow button{font-size:11px;padding:9px 3px;min-height:40px}
+.timer{font-variant-numeric:tabular-nums;text-align:center;font-size:19px;color:var(--cyan);min-height:23px}
+.route{display:flex;gap:6px;overflow-x:auto;padding:8px 0}
+.routeItem{min-width:145px;border:1px solid #363b43;border-radius:9px;padding:10px;background:#15181c}
+.routeItem.done{opacity:.4;text-decoration:line-through}
+.routeNum{font-size:10px;color:var(--gold)}
+.routeName{font-size:13px;font-weight:800;margin:3px 0 7px}
+.routeBtns{display:flex;gap:4px}.routeBtns button{font-size:10px;min-height:34px;padding:5px;flex:1}
+.mapWrap{margin-top:8px;border:1px solid #2f343b;border-radius:10px;overflow:hidden;background:#0a0c0f}
+.mapTitle{padding:8px 10px;font-size:10px;letter-spacing:.15em;color:#888;border-bottom:1px solid #272b30}
+#map{display:block;width:100%;height:auto;background:radial-gradient(circle at 50% 50%,#252a2c,#101316)}
+.mapLegend{display:flex;gap:12px;padding:8px;font-size:10px;color:#888;flex-wrap:wrap}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px;background:var(--gold)}.dot.fixed{background:#777}.line{display:inline-block;width:15px;height:2px;background:var(--gold);vertical-align:middle;margin-right:4px}
+.status{font-size:11px;color:#b8b2a3;line-height:1.5;margin-top:10px}
+.roleAdvice{border-top:1px solid #292d33;margin-top:10px;padding-top:10px;font-size:12px;color:#b5b8bd;line-height:1.6}
+.warning{font-size:11px;color:#8e9399;line-height:1.65}
+.warning b{color:#c9b887}
+@media(max-width:430px){.grid3{grid-template-columns:1fr}.seed{font-size:34px}.timerRow{grid-template-columns:repeat(4,1fr)}.timerRow button:last-child{grid-column:span 4}}

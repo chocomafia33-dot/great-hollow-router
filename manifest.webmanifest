@@ -1,0 +1,9 @@
+{
+  "name":"Great Hollow Router",
+  "short_name":"GH Router",
+  "start_url":"./",
+  "display":"standalone",
+  "background_color":"#08090b",
+  "theme_color":"#090a0c",
+  "lang":"ja"
+}
