@@ -3,7 +3,7 @@ const routeData = {
   detect:[
    {q:"南の結晶は？", yes:"purple", no:"west"},
    {q:"西側の結晶は？", yes:"ant", no:"green"},
-   {q:"アリ道の結晶は？", yes:"blue", no:"red"}
+   {q:"毒／血の廃墟内に結晶は？", yes:"blue", no:"red"}
   ],
  },
  kaiden:{
@@ -48,7 +48,7 @@ const mapPoints={
  "地下北西":{x:44.27,y:65.77,zone:"bottom"}
 };
 const detectionPoints={
- south:["南スタート","南・カイデン間","アリ道"],
+ south:["南スタート","南・カイデン間","毒/血の廃墟"],
  kaiden:["毒/血の廃墟","毒/血の廃墟下","中央見晴らし"],
  north:["開始地点","開始地点南側","地下アルコーブ"]
 };
@@ -355,7 +355,7 @@ $("#reportMismatch").onclick=()=>{
 };
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"map-focus-20261009",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),zone:state.zone,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
+ const data={version:"south-detect-fix-20261010",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),zone:state.zone,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}
