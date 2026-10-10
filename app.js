@@ -371,8 +371,9 @@ function render(){
  drawMap();
 }
 document.querySelectorAll("[data-zone]").forEach(b=>b.onclick=()=>{
+ if(state.zone===b.dataset.zone)return;
  state.zone=b.dataset.zone;
- // Keep zoom level, but reset the pan position when changing floors.
+ $("#mapViews").classList.remove("zoomed");$("#zoomMap").textContent="拡大";
  render();$("#mapViews").parentElement.scrollTop=0;$("#mapViews").parentElement.scrollLeft=0;
 });
 function drawMap(){
