@@ -132,13 +132,13 @@ test('contradictory absent history: fallback to all 21 neutral diamonds (injecte
 test('invalid answers do not alter history or current question',()=>{
   const a=replay('south');const before=JSON.stringify(a.state());a.answer('invalid');assert.equal(JSON.stringify(a.state()),before);
 });
-test('detection and result zoom toggle; floor switching resets pan and retains zoom',()=>{
+test('detection and result zoom toggle; floor switching resets pan and zoom',()=>{
   const a=replay('south');a.get('#zoomDetectMap').onclick();assert(a.get('#detectMapViews').classList.contains('zoomed'));
   assert.equal(a.get('#zoomDetectMap').textContent,'戻す');a.get('#zoomDetectMap').onclick();assert(!a.get('#detectMapViews').classList.contains('zoomed'));
   a.answer('yes');a.get('#zoomMap').onclick();assert(a.get('#mapViews').classList.contains('zoomed'));
   a.get('#mapViews').parentElement.scrollTop=300;a.get('#mapViews').parentElement.scrollLeft=100;
   a.zones[1].onclick();assert.equal(a.get('#mapViews').parentElement.scrollTop,0);assert.equal(a.get('#mapViews').parentElement.scrollLeft,0);
-  assert(a.get('#mapViews').classList.contains('zoomed'));a.get('#zoomMap').onclick();assert(!a.get('#mapViews').classList.contains('zoomed'));
+  assert(!a.get('#mapViews').classList.contains('zoomed'));a.get('#zoomMap').onclick();assert(a.get('#mapViews').classList.contains('zoomed'));a.get('#zoomMap').onclick();assert(!a.get('#mapViews').classList.contains('zoomed'));
 });
 for(const selector of ['#redetect','#changeStart']) test(`${selector}: clears all result, answer, floor, mismatch and zoom state`,()=>{
   const a=replay('south',['unknown','unknown','unknown']);a.get('#reportMismatch').onclick();a.zones[1].onclick();
