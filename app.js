@@ -251,7 +251,27 @@ const candidateGroups = {
 // Highlight means a source suggestion, not verified travel ease or a fixed order.
 const startHints={south:{purple:["g2-1"]},kaiden:{blue:["g1-2"],green:["g4-1"]},north:{red:["g3-2"],green:["g4-3"]}};
 function hasStartHint(id){return (startHints[state.start]?.[state.seed]||[]).includes(id);}
-let state={start:null,seed:null,candidates:[],zone:"top",mismatch:false};
+const seedNames={blue:"青",purple:"紫",red:"赤",green:"緑"};
+const neutralColor="#e5e2d8";
+let state={start:null,seed:null,seeds:[],candidates:[],zone:"top",mismatch:false,history:[],cautious:false,fallback:false};
+function questionPoint(node){
+ if(node.pointId)return candidatePoints.find(p=>p.id===node.pointId);
+ const index=routeData[state.start].detect.indexOf(node);
+ const p=mapPoints[detectionPoints[state.start][index]];
+ return candidatePoints.find(c=>c.zone===p.zone&&c.x===p.x&&c.y===p.y);
+}
+function cautiousSeeds(){
+ const absent=state.history.filter(a=>a.answer==="no").map(a=>a.pointId);
+ return Object.keys(candidateGroups).filter(seed=>absent.every(id=>!candidateGroups[seed].includes(id)));
+}
+function alternativePoint(seeds,anchor){
+ const used=new Set(state.history.map(a=>a.pointId));
+ const score=p=>{const yes=seeds.filter(s=>candidateGroups[s].includes(p.id)).length;return Math.max(yes,seeds.length-yes);};
+ return candidatePoints.filter(p=>!used.has(p.id)&&seeds.some(s=>candidateGroups[s].includes(p.id))&&seeds.some(s=>!candidateGroups[s].includes(p.id)))
+ .sort((a,b)=>score(a)-score(b)||(a.zone==="top"?0:1)-(b.zone==="top"?0:1)||Math.hypot(a.x-anchor.x,a.y-anchor.y)-Math.hypot(b.x-anchor.x,b.y-anchor.y)||a.id.localeCompare(b.id))[0];
+}
+function displayedPoints(){return state.mismatch||state.fallback?candidatePoints:state.candidates;}
+function resultColor(){return state.seed?colors[state.seed.toUpperCase()]:neutralColor;}
 
 const $=s=>document.querySelector(s);
 document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
@@ -261,7 +281,8 @@ document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{
  showDetect();
 });
 function clearResult(){
- state.seed=null;state.candidates=[];state.zone="top";state.mismatch=false;
+ state.seed=null;state.seeds=[];state.candidates=[];state.zone="top";state.mismatch=false;
+ state.history=[];state.cautious=false;state.fallback=false;state.currentNode=null;
  $("#reportMismatch").disabled=true;
  $("#status").classList.add("hidden");
  $("#mapViews").classList.remove("zoomed");$("#zoomMap").textContent="拡大";
@@ -289,14 +310,12 @@ function showDetect(){
 function renderQuestion(node){
  $("#question").innerHTML=`<div class="question">${node.q}</div>`;
  $("#answers").innerHTML=`<button onclick="answer('yes')">ある</button><button onclick="answer('no')">ない</button><button onclick="answer('unknown')">未確認</button>`;
- $("#detectNote").textContent="";
+ $("#detectNote").textContent=state.cautious?"未確認地点を避けて確認中 · 最大3回答":"";
  state.currentNode=node;
  drawDetectionMap(node);
 }
 function drawDetectionMap(node){
- const index=routeData[state.start].detect.indexOf(node);
- const name=detectionPoints[state.start][index];
- const p=mapPoints[name],x=p.x*10,y=p.y*10;
+ const p=questionPoint(node),name=p.name,x=p.x*10,y=p.y*10;
  $("#detectMapViews").innerHTML=`<section class="mapLayer"><div class="mapTitle">${p.zone==="top"?"地上":"地下"} · 確認する地点</div><svg viewBox="-30 -30 1060 1060" role="img" aria-label="${node.q}。丸で囲んだ地点を確認"><image href="map-${p.zone==="top"?"top":"bottom"}.webp" width="1000" height="1000"/><circle cx="${x}" cy="${y}" r="48" fill="#f8d77b" fill-opacity=".18" stroke="#08090b" stroke-width="15"/><circle cx="${x}" cy="${y}" r="48" fill="none" stroke="#f8d77b" stroke-width="8"/><path d="M${x-68} ${y}H${x-38} M${x+38} ${y}H${x+68} M${x} ${y-68}V${y-38} M${x} ${y+38}V${y+68}" stroke="#fff" stroke-width="5"/><circle cx="${x}" cy="${y}" r="8" fill="#fff"/><title>${name}</title></svg></section>`;
 }
 $("#zoomDetectMap").onclick=()=>{
@@ -305,21 +324,34 @@ $("#zoomDetectMap").onclick=()=>{
  $("#zoomDetectMap").textContent=zoomed?"拡大":"戻す";
 };
 window.answer=function(ans){
- if(ans==="unknown"){$("#detectNote").textContent="判定を保留中";return;}
- if(!["yes","no"].includes(ans))return;
- const target=state.currentNode[ans];
- const seed=["red","blue","green","purple"].includes(target)?target:null;
- if(seed){setSeed(seed);return;}
- const idx=routeData[state.start].detect.findIndex(x=>x===state.currentNode);
+ if(!["yes","no","unknown"].includes(ans)||!state.currentNode||state.history.length>=3)return;
+ const node=state.currentNode,p=questionPoint(node);
+ state.history.push({pointId:p.id,answer:ans});
+ if(ans==="unknown")state.cautious=true;
+ if(state.cautious){
+  state.seeds=cautiousSeeds();
+  if(state.seeds.length<=1||state.history.length>=3){showCandidates(state.seeds);return;}
+  const next=alternativePoint(state.seeds,p);
+  if(next)renderQuestion({pointId:next.id,q:next.name+"の結晶は？"});
+  else showCandidates(state.seeds);
+  return;
+ }
+ // Preserve the original normal branches; only unknown activates cautious evaluation.
+ const target=node[ans];
+ if(Object.keys(candidateGroups).includes(target)){setSeed(target);return;}
+ const idx=routeData[state.start].detect.indexOf(node);
  const next=routeData[state.start].detect[idx+1];
- if(next) renderQuestion(next);
+ if(next&&state.history.length<3)renderQuestion(next);
+ else showCandidates(cautiousSeeds());
 };
-function setSeed(seed){
- $("#detect").classList.add("hidden");
- state.seed=seed;state.candidates=candidateGroups[seed].map(id=>candidatePoints.find(p=>p.id===id));
- state.zone="top";state.mismatch=false;
- $("#result").classList.remove("hidden");
- $("#seed").textContent=seed.toUpperCase()+" 候補";$("#seed").style.color=colors[seed.toUpperCase()];
+function setSeed(seed){showCandidates([seed]);}
+function showCandidates(seeds){
+ state.seeds=[...seeds];state.seed=seeds.length===1?seeds[0]:null;
+ const ids=new Set(seeds.flatMap(seed=>candidateGroups[seed]));
+ state.candidates=candidatePoints.filter(p=>ids.has(p.id));
+ state.fallback=seeds.length===0;state.mismatch=state.fallback;
+ state.currentNode=null;state.zone="top";
+ $("#detect").classList.add("hidden");$("#result").classList.remove("hidden");
  $("#reportMismatch").disabled=false;
  resetView();render();
 }
@@ -328,12 +360,14 @@ function render(){
   const active=b.dataset.zone===state.zone;
   b.classList.toggle("active",active);b.setAttribute("aria-pressed",String(active));
  });
- $("#seed").textContent=state.seed.toUpperCase()+" 候補"+(state.mismatch?" · 全地点表示":"");
- $("#status").textContent=state.mismatch?"全21候補を表示中。結晶が存在するとは限りません。":"";
- $("#status").classList.toggle("hidden",!state.mismatch);
+ const multiple=state.seeds.length>1;
+ $("#seed").textContent=state.fallback?"配置未確定 · 全地点表示":state.seed?state.seed.toUpperCase()+" 候補"+(state.mismatch?" · 全地点表示":""):state.seeds.length+"配置候補 · 未確定"+(state.mismatch?" · 全地点表示":"");
+ $("#seed").style.color=resultColor();
+ $("#status").textContent=state.fallback?"回答と基本配置が一致しません。全21候補を表示。結晶が存在するとは限りません。":state.mismatch?"全21候補を表示中。結晶が存在するとは限りません。":multiple?state.seeds.map(s=>seedNames[s]).join("・")+"の候補を表示。結晶の存在は未確認です。":"";
+ $("#status").classList.toggle("hidden",!state.mismatch&&!multiple);
  $(".mapNote").textContent=state.mismatch?"全地点は資料上の候補・位置は目安":"資料上の候補・位置は目安";
- $(".hintLegend").innerHTML=state.mismatch?`<span style="color:${colors[state.seed.toUpperCase()]}">◆</span> 元の判定候補　<span class="extraKey">○</span> その他の候補`:`<span class="hintKey" aria-hidden="true">◇</span> 金枠：資料で開始付近に挙げられた候補`;
- $(".hintLegend").classList.toggle("hidden",!state.mismatch&&!state.candidates.some(p=>p.zone===state.zone&&hasStartHint(p.id)));
+ $(".hintLegend").innerHTML=state.mismatch?`<span style="color:${resultColor()}">◆</span> 元の判定候補　<span class="extraKey">○</span> その他の候補`:`<span class="hintKey" aria-hidden="true">◇</span> 金枠：資料で開始付近に挙げられた候補`;
+ $(".hintLegend").classList.toggle("hidden",state.fallback||(!state.mismatch&&(!state.seed||!state.candidates.some(p=>p.zone===state.zone&&hasStartHint(p.id)))));
  drawMap();
 }
 document.querySelectorAll("[data-zone]").forEach(b=>b.onclick=()=>{
@@ -342,12 +376,12 @@ document.querySelectorAll("[data-zone]").forEach(b=>b.onclick=()=>{
  render();$("#mapViews").parentElement.scrollTop=0;$("#mapViews").parentElement.scrollLeft=0;
 });
 function drawMap(){
- const zone=state.zone,tint=colors[state.seed.toUpperCase()];
- const points=(state.mismatch?candidatePoints:state.candidates).filter(p=>p.zone===zone);
+ const zone=state.zone,tint=resultColor();
+ const points=displayedPoints().filter(p=>p.zone===zone);
  const marks=points.map(p=>{
   const original=state.candidates.some(c=>c.id===p.id);
-  const extra=state.mismatch&&!original;
-  const label=state.mismatch?`${original?"元の判定候補":"その他の候補"}・存在は未確認`:"候補・位置は目安";
+  const extra=state.mismatch&&!state.fallback&&!original;
+  const label=state.mismatch&&!state.fallback?`${original?"元の判定候補":"その他の候補"}・存在は未確認`:"候補・位置は目安";
   return `<span class="crystalMarker ${extra?"extraCandidate":hasStartHint(p.id)?"startHint":""}" data-candidate-id="${p.id}" style="left:${p.x}%;top:${p.y}%;--marker-color:${extra?"#d5d9df":tint}" role="img" aria-label="${p.name}（${label}）" title="${p.name}（${label}）">${extra?"○":"◆"}</span>`;
  }).join("");
  $("#mapViews").innerHTML=`<div class="candidateMap"><img src="map-${zone}.webp" alt="${zone==="top"?"地上":"地下"}の結晶候補地図" draggable="false">${marks}</div>`;
@@ -358,14 +392,14 @@ $("#zoomMap").onclick=()=>{
  $("#zoomMap").textContent=zoomed?"拡大":"戻す";
 };
 $("#reportMismatch").onclick=()=>{
- if(!state.seed)return;
+ if(!state.seeds.length&&!state.fallback)return;
  state.mismatch=true;
  $("#otherMenu").open=false;
  render();
 };
 
 $("#copyDiagnostic").onclick=async()=>{
- const data={version:"all-candidates-fold-20261010",start:state.start,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),displayedCandidateIds:(state.mismatch?candidatePoints:state.candidates).filter(p=>p.zone===state.zone).map(p=>p.id),zone:state.zone,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
+ const data={version:"unknown-skip-20261010",start:state.start,remainingSeeds:state.seeds,answers:state.history,cautious:state.cautious,fallback:state.fallback,question:state.currentNode?.q,seed:state.seed,candidateIds:state.candidates.map(p=>p.id),displayedCandidateIds:displayedPoints().filter(p=>p.zone===state.zone).map(p=>p.id),zone:state.zone,startHintIds:startHints[state.start]?.[state.seed]||[],source:"Nightreign Hub distributions + supplied route table; checked 2026-10-09",mismatch:state.mismatch,locationVerification:"source-map-relative; provisional-name-matching; not-in-game-verified"};
  const report=JSON.stringify(data,null,2);
  $("#diagnosticText").value=report;$("#diagnosticText").classList.remove("hidden");
  try{await navigator.clipboard.writeText(report);$("#diagnosticMessage").textContent="診断情報をコピーしました。問題の説明と一緒に貼り付けてください。";}

@@ -1,5 +1,5 @@
-const CACHE="gh-router-all-candidates-fold-20261010";
-const ASSETS=["./","./index.html","./style.css?v=all-candidates-fold-20261010","./app.js?v=all-candidates-fold-20261010","./manifest.webmanifest","./map-top.webp","./map-bottom.webp"];
+const CACHE="gh-router-unknown-skip-20261010";
+const ASSETS=["./","./index.html","./style.css?v=unknown-skip-20261010","./app.js?v=unknown-skip-20261010","./manifest.webmanifest","./map-top.webp","./map-bottom.webp"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("gh-router-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));
 self.addEventListener("fetch",e=>{
