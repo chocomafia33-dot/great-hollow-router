@@ -27,6 +27,9 @@ button:disabled{opacity:.4;cursor:default}
 .mapWrap{border:1px solid var(--line);border-radius:8px;overflow:hidden;background:#101212}
 .mapControls{padding:4px 8px;font-size:11px;color:var(--muted)}
 .mapControls button{padding:6px 10px}
+#detect .mapControls{padding-top:0;padding-bottom:0}
+#detectMapHint{min-width:0;overflow-wrap:anywhere}
+#detect .mapControls button{flex-shrink:0}
 .mapScroll{overflow:auto;max-height:calc(100svh - 205px - env(safe-area-inset-top) - env(safe-area-inset-bottom));overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .candidateMap{position:relative}
 .candidateMap img{display:block;width:100%;height:auto}

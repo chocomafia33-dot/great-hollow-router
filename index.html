@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="style.css?v=floor-reset-20261010">
+<link rel="stylesheet" href="style.css?v=question-ui-20261010">
 <title>大空洞 · 結晶候補マップ</title>
 </head>
 <body>
@@ -25,7 +25,7 @@
   <div class="questionHead"><span>配置の確認</span><button id="changeStart">開始地点を変更</button></div>
   <div id="question"></div>
   <div class="mapWrap">
-    <div class="mapControls"><span>丸の地点を確認 · 位置は目安</span><button id="zoomDetectMap">拡大</button></div>
+    <div class="mapControls"><span id="detectMapHint">地上 · 丸を確認 · 位置は目安</span><button id="zoomDetectMap">拡大</button></div>
     <div class="mapScroll detectMapScroll"><div id="detectMapViews"></div></div>
   </div>
   <div id="answers" class="grid3"></div>
@@ -49,9 +49,9 @@
   <div id="diagnosticMessage" class="note" aria-live="polite"></div>
   <textarea id="diagnosticText" class="hidden" readonly aria-label="診断情報"></textarea>
   <div class="mapCredit">Map: Nightreign Hub / Alex0Goat・SisterNun</div>
-  <div class="version">floor-reset-20261010</div>
+  <div class="version">question-ui-20261010</div>
 </details>
 </main>
-<script src="app.js?v=floor-reset-20261010"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
+<script src="app.js?v=question-ui-20261010"></script><script>if("serviceWorker" in navigator && location.protocol!=="file:"){navigator.serviceWorker.register("sw.js")}</script>
 </body>
 </html>

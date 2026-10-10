@@ -316,7 +316,8 @@ function renderQuestion(node){
 }
 function drawDetectionMap(node){
  const p=questionPoint(node),name=p.name,x=p.x*10,y=p.y*10;
- $("#detectMapViews").innerHTML=`<section class="mapLayer"><div class="mapTitle">${p.zone==="top"?"地上":"地下"} · 確認する地点</div><svg viewBox="-30 -30 1060 1060" role="img" aria-label="${node.q}。丸で囲んだ地点を確認"><image href="map-${p.zone==="top"?"top":"bottom"}.webp" width="1000" height="1000"/><circle cx="${x}" cy="${y}" r="48" fill="#f8d77b" fill-opacity=".18" stroke="#08090b" stroke-width="15"/><circle cx="${x}" cy="${y}" r="48" fill="none" stroke="#f8d77b" stroke-width="8"/><path d="M${x-68} ${y}H${x-38} M${x+38} ${y}H${x+68} M${x} ${y-68}V${y-38} M${x} ${y+38}V${y+68}" stroke="#fff" stroke-width="5"/><circle cx="${x}" cy="${y}" r="8" fill="#fff"/><title>${name}</title></svg></section>`;
+ $("#detectMapHint").textContent=`${p.zone==="top"?"地上":"地下"} · 丸を確認 · 位置は目安`;
+ $("#detectMapViews").innerHTML=`<section class="mapLayer"><svg viewBox="-30 -30 1060 1060" role="img" aria-label="${node.q}。丸で囲んだ地点を確認"><image href="map-${p.zone==="top"?"top":"bottom"}.webp" width="1000" height="1000"/><circle cx="${x}" cy="${y}" r="48" fill="#f8d77b" fill-opacity=".18" stroke="#08090b" stroke-width="15"/><circle cx="${x}" cy="${y}" r="48" fill="none" stroke="#f8d77b" stroke-width="8"/><path d="M${x-68} ${y}H${x-38} M${x+38} ${y}H${x+68} M${x} ${y-68}V${y-38} M${x} ${y+38}V${y+68}" stroke="#fff" stroke-width="5"/><circle cx="${x}" cy="${y}" r="8" fill="#fff"/><title>${name}</title></svg></section>`;
 }
 $("#zoomDetectMap").onclick=()=>{
  const zoomed=$("#detectMapViews").classList.contains("zoomed");
